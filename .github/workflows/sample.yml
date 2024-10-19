@@ -30,8 +30,8 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/google-run-app:$GITHUB_SHA .
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/google-run-app:$GITHUB_SHA
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-source-deploy/google-run-app:$GITHUB_SHA .
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-source-deploy/google-run-app:$GITHUB_SHA
 
       - name: Deploy to Cloud Run
         run: |
@@ -40,4 +40,3 @@ jobs:
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated
-
