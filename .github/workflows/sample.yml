@@ -1,0 +1,43 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # mainブランチへのpushで実行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # リポジトリのチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Google Cloudへの認証
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_ID }}/locations/global/workloadIdentityPools/shirotabi/providers/sample-github'
+          service_account: 'shirotabirun@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+
+      # gcloud CLI のインストール
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # DockerイメージのビルドとPush
+      - name: Build and Push Docker image
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/google-run-app:$GITHUB_SHA .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/google-run-app:$GITHUB_SHA
+
+      # Cloud Run にデプロイ
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy google-run-app \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/google-run-app:$GITHUB_SHA \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated
