@@ -1,14 +1,9 @@
-on:
-  push:
-    branches:
-      - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # IDトークンの書き込み権限
-      contents: read   # リポジトリのコードにアクセスする権限
+      id-token: write
+      contents: read
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -19,9 +14,17 @@ jobs:
         workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
 
+    - name: Build Docker image
+      run: |
+        docker build -t us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest .
+
+    - name: Push Docker image to Artifact Registry
+      run: |
+        docker push us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest
+
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy mycloudrun-app \
-          --image gcr.io/$GCP_PROJECT_ID/mycloudrun-app \
+          --image us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest \
           --region us-central1 \
           --allow-unauthenticated
