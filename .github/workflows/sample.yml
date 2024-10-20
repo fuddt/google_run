@@ -16,15 +16,15 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest .
+        docker build -t gcr.io/composed-future-432411-p8/mycloudrun-app:latest .
 
-    - name: Push Docker image to Artifact Registry
+    - name: Push Docker image to GCR
       run: |
-        docker push us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest
+        docker push gcr.io/composed-future-432411-p8/mycloudrun-app:latest
 
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy mycloudrun-app \
-          --image us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest \
+          --image gcr.io/composed-future-432411-p8/mycloudrun-app:latest \
           --region us-central1 \
           --allow-unauthenticated
