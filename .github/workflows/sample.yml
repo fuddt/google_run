@@ -1,3 +1,9 @@
+# ここでワークフローのトリガーを定義
+on:
+  push:
+    branches:
+      - main  # main ブランチに push されたときに実行される
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
