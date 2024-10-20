@@ -19,13 +19,22 @@ jobs:
         workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
 
-    - name: Build Docker image
-      run: |
-        docker build -t us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest .
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
 
-    - name: Push Docker image to Artifact Registry
+    - name: Configure Docker to use gcloud credentials
       run: |
-        docker push us-central1-docker.pkg.dev/composed-future-432411-p8/my-repo/mycloudrun-app:latest
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Build and push Docker image
+      env:
+        REGION: us-central1
+        PROJECT_ID: composed-future-432411-p8
+        REPO: my-repo
+        IMAGE: mycloudrun-app
+      run: |
+        docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest .
+        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest
 
     - name: Deploy to Cloud Run
       run: |
